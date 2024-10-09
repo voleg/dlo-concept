@@ -22,6 +22,7 @@ class PlatformProfile(models.Model):
     platform_user_type = models.CharField(choices=PlatformUserType, default=PlatformUserType.UNSPECIFIED, max_length=32)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    config = models.ForeignKey(PlatformConfig, null=True, on_delete=models.SET_NULL)
 
     def __str__(self):
         return f'Platform {self.platform_user_type}: {self.pk}'
