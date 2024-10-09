@@ -15,10 +15,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, re_path
-from django.views.static import serve
-
+from django.urls import include, path
 
 admin.site.site_header = "App Admin"
 admin.site.index_title = "App Admin"
@@ -26,7 +25,7 @@ admin.site.site_title = "App Admin"
 
 
 urlpatterns = [
+    path('', include('demo_pages.urls')),
+    path('dlo/', include('minddistrict_connect.urls')),
     path('admin/', admin.site.urls),
-    re_path(r"^static/(?P<path>.*)$", serve,{"document_root": settings.STATIC_ROOT}),
-    
-]
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

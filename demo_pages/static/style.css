@@ -1,0 +1,127 @@
+body {
+    font-family: Arial, sans-serif;
+}
+
+.dashboard-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    font-size: 28px;
+    color: #333;
+}
+
+.user-info, .profile-info {
+    margin: 20px 0;
+}
+
+p {
+    font-size: 18px;
+}
+
+a {
+    display: inline-block;
+    margin-top: 20px;
+    color: #007BFF;
+    text-decoration: none;
+}
+
+.login-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    font-size: 24px;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.messages {
+    color: red;
+    list-style-type: none;
+}
+/* Flexbox styling for the container */
+.resources-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+/* Flexbox styling for the list itself */
+.resources {
+    display: flex; /* Make the list a flex container */
+    flex-wrap: wrap; /* Allow wrapping if buttons don’t fit in a single line */
+    gap: 10px; /* Space between buttons */
+    padding: 0;
+    margin: 0;
+    list-style-type: none; /* Remove bullets */
+}
+
+/* Individual list item styling */
+.resources li {
+    margin: 0;
+}
+/* Style the links to look like buttons */
+.resources a {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007BFF;
+    border-radius: 5px;
+    text-decoration: none;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+.resources a:hover {
+    background-color: #0056b3; /* Darken the button on hover */
+}
+
+/* Optional: Adjust for mobile screens */
+@media (max-width: 600px) {
+    .resources-container {
+        flex-direction: column;
+    }
+
+    .resources a {
+        width: 100%;
+        text-align: center;
+    }
+}

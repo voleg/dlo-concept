@@ -1,0 +1,43 @@
+{% load static %}  <!-- Load the static template tag -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Dashboard</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Welcome, {{ user.first_name }} {{ user.last_name }}</h1>
+        <div class="user-info">
+            <p><strong>Username:</strong> {{ user.username }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Date Joined:</strong> {{ user.date_joined }}</p>
+            <p><strong>Last Login:</strong> {{ user.last_login }}</p>
+            <!-- You can add more fields or user-related information here -->
+        </div>
+
+        <!-- If you have a profile model with additional data, display it -->
+        <div class="profile-info">
+            <h2>Profile Details</h2>
+            <p><strong>Type:</strong> {{ profile.platform_user_type }}</p>
+        </div>
+				<div class="resourses-container">
+					<ul class="resources">
+					{% for key, description in data.items %}
+					    <li><a href="{% url 'dlo' path=key %}">{{description}}</a></li>
+					{% endfor%}
+					</ul>
+				</div>
+        <a href="{% url 'logout' %}">Logout</a>
+				        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</body>
+</html>
