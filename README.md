@@ -47,5 +47,16 @@ than open [app admin](http://localhost:8000/admin)
 
 After successfull build and run you should see django migrations runnign, fixtures applied, tests succeed and app stated. 
 
-Right after that follow to [app admin page](http://localhost:8000/admin/) and configure *MD DLO connector*, by adding the third party service base url and the shared secret. 
+Right after that follow to [app admin page](http://localhost:8000/admin/) login `login: admin, passwd: 123` and configure [MD DLO connector](http://localhost:8000/admin/minddistrict_connect/platformconfig/add/), by adding the third party service `base_url` and the `shared_secret`.
 
+After that logout from `admin` account and login to one of the users:
+
+credentials of client:
+- Username: clara@example.com
+- Password: secret
+ 
+credentials of professional:
+- Username: peter@example.com
+- Password: secret
+
+You will see a simple user profile, with the links to external resources in minddistrict platform. By clicking on then the DLO flow will be executed resulting in generation of URLs, according to [delegated logon specs](https://docs.minddistrict.com/delegatedlogon/index.html).

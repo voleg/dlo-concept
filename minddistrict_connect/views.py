@@ -8,5 +8,4 @@ from minddistrict_connect.controller import DLO
 def connect_redirect(request, path: str):
     controller = DLO(request.user)
     dlo_url = controller.adapter.build_url(path=path)
-    print(f'\n\n{dlo_url}\n\n')
     return redirect(dlo_url)
