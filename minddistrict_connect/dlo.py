@@ -40,8 +40,8 @@ class DLOAdapter:
     def build_message(self, **params) -> str:
         return ''.join([key + str(value) for key, value in sorted(params.items())])
 
-    def build_url(self, redirect: str = None):
-        base_url = self.base_url
+    def build_url(self, path: str = '/', redirect: str = None):
+        base_url = urljoin(self.base_url, path)
         params = self.get_params()
 
         if redirect:
