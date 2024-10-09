@@ -1,6 +1,7 @@
 from typing import Literal
 
 import fire
+
 from minddistrict_connect.dlo import DLOAdapter
 
 

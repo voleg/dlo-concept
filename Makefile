@@ -19,4 +19,4 @@ test:
 	uv run pytest
 
 run:
-	docker run -d -p 8000:8000 $(IMAGE_NAME):$(VERSION)
+	docker run -p 8000:8000 $(IMAGE_NAME):$(VERSION)

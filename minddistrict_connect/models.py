@@ -16,7 +16,7 @@ class PlatformProfile(models.Model):
         UNSPECIFIED = 'unspecified'
         CLIENT = 'client'
         CAREPROVIDER = 'careprovider'
-    
+
     user = models.OneToOneField(get_user_model(), on_delete=models.CASCADE)
     platform_user_id = models.CharField(max_length=255, null=True)
     platform_user_type = models.CharField(choices=PlatformUserType, default=PlatformUserType.UNSPECIFIED, max_length=32)
