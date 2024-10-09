@@ -9,7 +9,7 @@ def build_dlo_url(
     shared_secret: str,
     base_url: str,
     user_type: Literal["client", "careprovider"],
-    user_id: str, 
+    user_id: str,
     redirect_url: str = None,
 ):
     adapter = DLOAdapter(

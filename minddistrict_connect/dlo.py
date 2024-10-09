@@ -1,9 +1,10 @@
-import hmac
 import hashlib
+import hmac
 import uuid
 from datetime import datetime
-from urllib.parse import urlencode, quote, urljoin
+from urllib.parse import urlencode, urljoin
 
+# ruff: noqa: S101
 
 def build_hmac_token(secret_key: str, message: str) -> str:
     """Generate HMAC token using SHA-512 algorithm."""
@@ -16,7 +17,7 @@ class DLOAdapter:
     def __init__(self,
                  secret_key: str, base_url: str, usertype:
                  str, userid: str) -> None:
-        
+
         self.secret_key = secret_key
         self.base_url = base_url
         self.usertype = usertype
@@ -24,7 +25,7 @@ class DLOAdapter:
 
     def get_nonce(self) -> str:
         return str(uuid.uuid4())
-    
+
     def get_utc_timestamp(self) -> str:
         return datetime.utcnow().isoformat(timespec='milliseconds') + 'Z'
 
@@ -36,20 +37,20 @@ class DLOAdapter:
             'usertype': self.usertype,
         }
 
-    def build_message(self, **params) -> str:    
+    def build_message(self, **params) -> str:
         return ''.join([key + str(value) for key, value in sorted(params.items())])
-    
+
     def build_url(self, redirect: str = None):
         base_url = self.base_url
         params = self.get_params()
-        
+
         if redirect:
             params['redirect'] = redirect
             base_url = urljoin(self.base_url, 'aux/frameredirect')
-            
-        message = self.build_message(**params)        
+
+        message = self.build_message(**params)
         token = build_hmac_token(self.secret_key, message)
         params.update({'token': token})
         query_string = urlencode(params)
-        
+
         return f'{base_url}/?{query_string}'
