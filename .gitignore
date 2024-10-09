@@ -1,0 +1,9 @@
+.venv
+__pycache__
+*.override.yml
+data/
+.DS_Store
+.docker.env
+*.*~
+.projectile
+.dir-locals.el
