@@ -7,3 +7,4 @@ data/
 *.*~
 .projectile
 .dir-locals.el
+db.sqlite3

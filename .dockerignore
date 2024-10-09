@@ -8,3 +8,4 @@ data
 .env
 .projectile
 .dir-locals.el
+db.sqlite3

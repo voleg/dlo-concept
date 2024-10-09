@@ -1,7 +1,7 @@
 from typing import Literal
 
 import fire
-from core import DLOAdapter
+from minddistrict_connect.dlo import DLOAdapter
 
 
 def build_dlo_url(
