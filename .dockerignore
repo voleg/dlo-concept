@@ -1,0 +1,10 @@
+__pycache__/
+.vscode/
+README.md
+*.log
+data
+.venv
+*.*cache
+.env
+.projectile
+.dir-locals.el

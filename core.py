@@ -47,9 +47,7 @@ class DLOAdapter:
             params['redirect'] = redirect
             base_url = urljoin(self.base_url, 'aux/frameredirect')
             
-        message = self.build_message(**params)
-        print(f'MESSAGE: {message}')
-        
+        message = self.build_message(**params)        
         token = build_hmac_token(self.secret_key, message)
         params.update({'token': token})
         query_string = urlencode(params)
