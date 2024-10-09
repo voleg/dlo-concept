@@ -26,6 +26,7 @@ WORKDIR /code
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 SHELL ["/bin/sh", "-c"]
-CMD python manage.py migrate; \
-		python manage.py loaddata demo_init.json; \
-		pytest; python manage.py runserver 0.0.0.0:8000
+CMD python manage.py migrate && \
+		python manage.py loaddata demo_init.json && \
+		pytest && \
+		python manage.py runserver 0.0.0.0:8000
