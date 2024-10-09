@@ -11,4 +11,4 @@ COPY pyproject.toml uv.lock /code/
 
 RUN uv sync --frozen
 ADD . /code
-CMD 'sh'
+CMD 'sh -c "python manage.py migrate; python manage.py loaddata demo_init.json; python manage.py runserver 0.0.0.0:8000"'

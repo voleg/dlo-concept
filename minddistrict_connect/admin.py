@@ -1,2 +1,8 @@
+from django.contrib import admin
 
-# Register your models here.
+from minddistrict_connect.models import PlatformConfig, PlatformProfile
+ 
+
+@admin.register(PlatformConfig, PlatformProfile)
+class PlatformAdmin(admin.ModelAdmin):
+    ...
