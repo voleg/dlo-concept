@@ -6,6 +6,24 @@ from urllib.parse import urlencode, urljoin
 
 # ruff: noqa: S101
 
+
+USER_RESOURSES = {
+    'client': {
+        'catalogue': 'client catalog',
+        'conversations': 'conversations',
+    },
+
+    'careprovider': {
+        'tasks': 'tasks for professional',
+        'c': 'my clients',
+        'c/@@allclients': 'all clients',
+        'p': 'list of proffessionals',
+        'configuration': 'application configuration',
+        'catalogue': 'client catalog',
+    }
+}
+
+
 def build_hmac_token(secret_key: str, message: str) -> str:
     """Generate HMAC token using SHA-512 algorithm."""
     key = secret_key.encode('ascii')
@@ -54,3 +72,7 @@ class DLOAdapter:
         query_string = urlencode(params)
 
         return f'{base_url}/?{query_string}'
+
+    def discover_resources(self, usertype: str) -> dict[str, str] | None:
+        return USER_RESOURSES.get(usertype)
+
