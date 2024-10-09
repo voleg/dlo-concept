@@ -1,6 +1,6 @@
 [project]
 name = "coding-assignment-dlo"
-version = "0.1.1"
+version = "0.2.0"
 description = "DLO connction poc"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -15,4 +15,80 @@ dependencies = [
 dev-dependencies = [
     "ruff>=0.6.9",
     "ipython>=8.28.0",
+    "isort>=5.13.2",
+    "mypy>=1.11.2",
 ]
+
+[pytest]
+django_debug_mode = false
+django_find_project = false
+
+# [tool.pytest.ini_options]
+# DJANGO_SETTINGS_MODULE = "scive.test_settings"
+
+[tool.mypy]
+strict = true
+exclude = ["venv"]
+plugins = ["mypy_django_plugin.main"]
+
+[tool.django-stubs]
+django_settings_module = "scive.settings"
+
+
+[tool.isort]
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+line_length = 110
+
+[tool.ruff]
+show-fixes = false
+exclude = [
+		".git",
+		".mypy_cache",
+		".ruff_cache",
+		".venv",
+]
+line-length = 110
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+		"C90",
+		"N",
+		# "D",
+		# "ANN",
+		"ASYNC",
+		"S",
+		"SIM",
+		"FIX"
+]
+ignore = [
+    # "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "W191",  # indentation contains tabs
+    "B904",  # Allow raising exceptions without from e, for HTTPException
+]
+fixable = ["ALL"]
+unfixable = []
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
