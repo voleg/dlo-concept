@@ -1,0 +1,331 @@
+* Delegated logon
+Having a Delegated Logon (“DLO”) into the Minddistrict platform simply means generating a URL which, when clicked, will login the user into the Minddistrict platform using the credentials encoded in this URL.
+
+The credentials and parameters use so-called HMAC or “hash-based message authentication code”. A signed hash based on a shared secret is derived from the credentials and parameters, to ensure only the party entrusted with the shared secret can generate valid hashes and is allowed to authenticate end-users. The credentials and parameters are passed in as a query string to the URL of the Minddistrict platform.
+
+The shared secret is generated in the Minddistrict platform and needs to be handled safely. It is essential too that the third party system generating the DLO URLs for each end-user does so in a safe manner and not hand out URLs meant for one user to another user. There’s no end-user authentication step in this setup.
+
+Optionally you can use this delegated logon to “deep link” to certain locations in the platform. Additionally and also optionally there’s a iframe-redirect helper endpoint. The DLO can work without deep linking and the frame redirect helpers. They merely can be useful additional features.
+** Use-case and examples
+Common use-cases are:
+- From a third party system, send a therapist or secretary to the Minddistrict platform and be automatically logged in.
+- From a third party system, send a therapist to the Minddistrict platform, have them automatically log in and go to the dossier of a client.
+- From a third party system, send a therapist to the Minddistrict platform, have them automatically log in and go to their tasks page.
+- From a third party system, send a secretary to the Minddistrict platform, have them automatically log in and open the page listing all the clients
+- From a third party system, send an application manager to the Minddistrict platform, have them automatically log in and open the page listing the professionals in the platform.
+- From a third party system, send a client to the Minddistrict platform and have them automatically log in.
+
+** Prerequisites to generating the DLO URL
+To generate these delegated logon URLs the third party system needs to:
+
+- Have information about the user that needs to be authenticated and the corresponding external user identifier in the Minddistrict platform.
+- Needs to have the system time correctly set.
+- Safely keep the shared secret key that was generated in the Minddistrict platform.
+- Be able to generate the HMAC as described below.
+- Optionally keeps information about the URLs used for deep linking. This could require using the [[https://docs.minddistrict.com/api/2/index.html][Minddistrict REST-API]] that is separately documented.
+  
+The end result of this will be a URL like:
+
+An example of a DLO URL is:
+
+~https://customer.minddistrict.com/?usertype=careprovider&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+An example, including “deep linking” (see below) to a client dossiers using the /aux/ or “auxiliary” namespace:
+
+~https://customer.minddistrict.com/aux/client/id/123?usertype=careprovider&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+*NOTE* that the credentials and parameters segement of the DLO URLs can be used on any URL to the Minddistrict platform. There is no specific “DLO endpoint”.
+
+** The “shared secret” key
+To be able to generate HMAC tokens we not only need a “message” but we also need a “secret key” or “shared secret”. This secret key is the most important and security-sensitive part of the delegated logon system.
+
+This secret key is a long string of characters that needs to be the same in the Minddistrict platform and in the system generating the delegated logon URLs. This secret key can only be generated in the Minddistrict platform; it cannot be set. Only an application manager can generate the secret key. When an application manager generates a secret key it is shown to her exactly once, for security reasons.
+
+It’s essential that the secret key is transferred securely to the system that will generate the delegated logon URLs. As an example: sending it over email is not secure as email can be easily intercepted, email is also backed up most of the time, which are both vectors of attack. Once an attacker has possession of the secret key they’re able to login to the Minddistrict platform as any user, including the application manager.
+
+We recommend generating the secret key when logged into a known safe computer and then copy-pasting it into the system that will use it to generate delegated logon URLs. Afterwards, purge the system clipboard.
+
+The secret key in a Minddistrict platform is unique for each application, so one health care organisation will not have the same key as another.
+
+An application manager can regenerate the secret key at any time. Only the last secret key that was generated will be valid. This screen in the Minddistrict platform is only available when that specific Minddistrict platform application has the delegated-logon functionality turned on. The Minddistrict service desk can enable this feature.
+
+** Constructing the credentials and HMAC hash
+*** User type
+
+The ~usertype~ is one of the GET parameters in the query part of the URL.
+The ~usertype~ can currently have one of two values:
+
+- ~careprovider~ for all delegated logon URLs for logging in professionals (therapists, secretaries, application managers etc.)
+- ~client~ for all delegated logon URLs for logging in clients
+
+Examples:
+- ~usertype=careprovider~
+- ~usertype=client~
+
+*** User ID
+
+The ~userid~ is one of the GET parameters in the query part of the URL.
+
+User accounts in the Minddistrict platform can all have an ID, although this is not required. When we talk about ID’s in this context we mean the ID’s that come from external systems. Users in the Minddistrict platform do have an internal ID but this is not shown in the user interface and irrelevant in this context. An application manager can either manually set the ID that comes from an external system or it can be automatically provided when there’s a data exchange between the two systems (using the REST API or using HL7 messages).
+
+These ID’s are strings, so they can be something else than a number. For example: when an external system uses nicknames as ID’s they can be used as the ID for users in the Minddistrict platform.
+
+Professional accounts always have an ID, the field for this in the Minddistrict platform is “professional identification”. This is a non-required field. The Minddistrict platform can be configured to let client accounts have ID’s and to make them required.
+
+Please note: a professional and a client can have the same ID! This is why you should also supply the usertype parameter.
+
+Examples:
+- ~userid=123~
+- ~userid=abc123~
+- ~userid=jamesbrown~
+
+*** Timestamp
+
+The ~timestamp~ is one of the GET parameters in the query part of the URL.
+
+The timestamp is used to have URLs with a limited lifetime because this is more secure. A delegated logon URL that is generated now can only be used within a certain time frame before it becomes invalid. This timeframe is currently set to one hour. It's a good idea to generate a timestamp that is as close to the actual current time as possible.
+
+The timestamp may also not be in the future. So be sure that the server or system generating the delegated logon URLs has the correct time. The server time can be found in the beginning of the HTML source of every page of the Minddistrict platform.
+
+The ~timestamp~ in the URL should be in the [[https://en.wikipedia.org/wiki/ISO_8601][ISO 8601]] format.
+
+Every timestamp should be time zone aware, so it needs to have a ~Z~ or ~+hh:mm~ at the end.
+
+Examples:
+- ~timestamp=2019-09-07T14:57:07Z~
+- ~timestamp=2019-09-07T14:57:07.123+01:00~
+- ~timestamp=2019-09-07T14:57:07.821882Z~
+*** Nonce
+
+The ~nonce~ is one of the GET parameters in the query part of the URL.
+
+The ~nonce~ is a universally unique ID, a UUID or GUID can be used for this. A timestamp that is unique enough (enough granularity) will also work.
+
+This nonce is used to make sure each delegated URL can only be used one time. If we get a delegated logon request using a nonce we have seen before we will not authenticate the request. If the SSL connection would be compromised and an attacker “sniffs” delegated logon URLs they cannot login with them again.
+
+Examples:
+- ~nonce=add6e7a8-ed10-45ff-abb6-a23391c028ef~
+- ~nonce=5bea9b3e-3782-47e4-ab0e-1581836d6300~
+- ~nonce=5cc30b41-5ebd-46d7-833c-880623cb115e~
+- ~nonce=2019-09-07T14:57:07.821882Z~
+
+*** Token
+
+The ~token~ is one of the GET parameters in the query part of the URL.
+
+The ~token~ is the result of applying a specific algorithms to all of the parameters in the URL using the shared secret key. This algorithm is [[https://en.wikipedia.org/wiki/SHA-2][HMAC SHA512]] , which the more common programming languages have support or a library for. More information about these standards can be found here: [[http://www.ietf.org/rfc/rfc2104.txt][IETF RFC 2104]].
+
+The algorithm must be given two arguments:
+
+- a secret key
+- a message
+
+So:
+
+#+begin_src
+  token = hmac_sha512(message, secret_key)
+#+end_src
+
+What the secret key is will be explained below.
+
+The message is the concatenation of all GET parameter names and their values (sorted alphabetically on the parameter names), like so: ~Key1Value1Key2Value2...KeyNValueN~. This (obviously) excludes the token parameter that you only know after applying the algorithm. We do not use separators between the parameter names and their values. The message itself is not a parameter in the URL.
+
+Here’s an example of some parameters, their names and the resulting message:
+
+| parameter name | parameter value                      |
+| nonce          | add6e7a8-ed10-45ff-abb6-a23391c028ef |
+| timestamp      | 2019-09-07T14:57:07.821882Z          |
+| userid         | 123                                  |
+| usertype       | careprovider                         |
+
+Message:
+
+~nonceadd6e7a8-ed10-45ff-abb6-a23391c028eftimestamp2019-09-07T14:57:07.821882Zuserid123usertypecareprovider~
+
+The result of the [[https://en.wikipedia.org/wiki/SHA-2][HMAC SHA512]] algorithm is a token in hex format so the case is irrelevant: ~F4C~ is the same as ~f4c~.
+
+*NOTE* The previous implementation of the DLO supported the [[https://en.wikipedia.org/wiki/Hmac][HMAC SHA1]] algorithm. For existing DLO integrations this is still supported. For new implementations we require using [[https://en.wikipedia.org/wiki/SHA-2][HMAC SHA512]].
+
+*** Frame redirect URL
+**** Adding a redirect URL parameter is optional.
+
+The redirect URL parameter can be useful in specific cases where a client or professional needs to be authenticated and subsequently redirected to another URL. The URL that is being redirected to can be outside or inside of the Minddistrict platform. This authenticating-then-redirecting can be useful when attempting to load the Minddistrict platform in an HTML frame as some browsers prevent framed domains from setting new cookies.
+
+The redirect URL parameter is an optional GET parameter in the query part of the URL. If the redirect URL parameter is used the base path needs to be:
+
+https://customer.minddistrict.com/aux/frameredirect
+
+The value of the redirect parameter is the URL to which the Minddistrict platform should redirect after authentication. For redirection to work the “security settings” needs to allow frames, this is a setting that allows the Minddistrict platform to be framed into an HTML frame. Secondly the domain of the URL that is being redirected to needs to be in the list of allowed domains for framing. This is also the case for redirecting to the Minddistrict platform itself.
+
+**** URL encoding
+
+The GET parameters in any URL need to be [[https://en.wikipedia.org/wiki/Percent-encoding][URL encoded]]. This is especially important for the redirect parameter because its will definitely contain characters that need to be encoded. For example ~redirect=https://www.example.com~ needs to be encoded into ~redirect=https%3A%2F%2Fwww.example.com~.
+
+**** Creating the token
+
+When passing a redirect parameter, this parameter also needs to be part of the message when creating the token.
+
+Here’s an example of some parameters, their names and the resulting message:
+
+| parameter name | parameter value                      |
+| nonce          | add6e7a8-ed10-45ff-abb6-a23391c028ef |
+| redirect       | https://www.example.com              |
+| timestamp      | 2019-09-07T14:57:07.821882Z          |
+| userid         | 123                                  |
+| usertype       | careprovider                         |
+
+Message:
+
+~nonceadd6e7a8-ed10-45ff-abb6-a23391c028efredirecthttps://www.example.comtimestamp2019-09-07T14:57:07.821882Zuserid123usertypecareprovider~ 
+As the example shows: the redirect URL should not be encoded before putting it in the message.
+** Path inside the Minddistrict platform
+
+Let’s deconstruct the DLO URL.
+*** Base URL
+
+The base URL is the first part of the delegated logon URL and is the subdomain(s) and domain of the Minddistrict platform we’re trying to login to, such as:
+
+- https://foo.e-behandeling.nl
+- https://bar.training.minddistrict.com
+- https://baz.sandbox.minddstrict.com
+- https://qux.minddstrict.dev
+
+In the aformentioned example the base URL is https://customer.minddistrict.com.
+*** Path inside the Minddistrict platform
+
+By adding a path to the URL you can send a user to a specific location in the Minddistrict platform. However, not all users have the right to see everything. If you send a user to a certain page please be sure that that user is allowed to see that page. Otherwise they will be logged in still, but will get an error page explaining they cannot access the requested page or resource.
+
+An example of this is sending an application manager to a client page. When this happens the application manager can be successfully authenticated, but because application managers are not allowed to view client profiles they too will get an “access forbidden”-type of error.
+
+**** Professionals
+The delegated logon URL can point either to the root of the Minddistrict platform or to a certain location “under” it. The landing page of the application is at the root URL ~/~.
+
+To access a given location, simply add between the base URL and the ~?~ - indicating the start of the query string that contain the credentials and parameters for the DLO - one of the following URL paths:
+
+| Function in the application | URL part       |
+| tasks for professional      | /tasks         |
+| my clients                  | /c/            |
+| all clients                 | /c/@@all       |
+| list of professionals       | /p/            |
+| application configuration   | /configuration |
+| catalogue                   | /catalogue     |
+
+For example a professional listing clients in the platform:
+
+~https://customer.minddistrict.com/c?usertype=careprovider&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+Or, for example a professional opening the platform configuration settings overview:
+
+~https://customer.minddistrict.com/configuration?usertype=careprovider&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+*NOTE* The paths listed above are reasonably stable and not immediately prone to change. However, this is not guaranteed.
+**** Clients
+
+Useful URLs for clients can be used in a similar way:
+
+| Function in the application    | URL part       |
+| catalogue with self help items | /catalogue     |
+| conversations                  | /conversations |
+
+For example, a client accessing the catalogue of the platform:
+
+~https://customer.minddistrict.com/catalogue?usertype=client&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+Or for example, a client accessing their conversations listing:
+
+~https://customer.minddistrict.com/conversations?usertype=client&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+*NOTE* The paths listed above are reasonably stable and not immediately prone to change. However, this is not guaranteed.
+** Auxiliary URLs or deep linking
+
+NOTE The “auxiliary” URLs are an optional feature. In fact, the “auxiliary” URLs can be used without the delegated logon URLs. They can even be applied to the [[https://docs.minddistrict.com/api/2/index.html][Minddistrict REST-API]].
+
+As a professional, a common thing to want to is to “deep link” to the dossier for a specific client. However, the URL to a client dossier cannot easily be computed by the third party system, as that would rely on internal details for identifying the client’s user account. To aid with this, there’s the so-called “auxiliary” URLs or “namespace”. The “aux” URLs provide a way to “navigate” to user account based on identifying information the third party system can have (and should have for the DLO to work in the first place) namely the external client id.
+
+The “aux” URLs are paths that start with ~/aux~ then an auxiliary indicator, then an axis indicator and then the value for the attribute.
+
+An example of this is:
+
+~https://customer.minddistrict.com/aux/client/id/123?usertype=careprovider&userid=456&timestamp=2019-09-07T14:57:07Z&nonce=1f19719ca3984b3ca43599f3c3ad258e&token=B709BC906185A47B4FA578ED2DC1840613691609~
+
+In this example, the auxiliary indicator is client, the axis is id and the value for it is 123. In this example the “aux” URL will try to resolve and then HTTP redirect to the client account with external client id ~123`~ if it can find it. Otherwise you get a ~404~ not found error.
+
+The available “aux” URLs are:
+
+| Auxiliary and axis           | redirects to                                                     |
+| /aux/professional/id/[value] | redirects to the professional account with the given external id |
+| /aux/client/id/[value]       | redirects to the client account with the given external id       |
+
+** Additional remarks
+
+We’ll communicate over an SSL connection so the URLs themselves can’t be intercepted.
+
+The authentication technique described here does not communicate any authorization information, as the Minddistrict platform will apply its own authorization policy.
+
+We suggest creating a delegated logon URL at the latest possible time so the URL is as “fresh” as possible. If the URL is generated when the user sees the interface the user may wait for over an hour before clicking and then the link will have become stale/invalid. We suggest generating the URL when the user initiates the action to login. In a web interface one way to do this is with a redirect.
+
+** Troubleshooting problems with the delegated logon
+
+The different error notices that are given mean different things.
+
+When visiting a delegated logon URL a user can get redirected to a login form. This means that the authentication failed because the delegated logon URL was invalid for some reason. The suggestions below may help localise the problem.
+
+If the user gets a notice that the resource or the page cannot be found this means that the link to the Minddistrict platform points to something that does not exist (such as a client id that is not known). This in itself has nothing to do with the authentication; indeed, the fact the user sees this notice confirms that authentication is working.
+
+Further problems with the delegated logon can fall into two categories which have slightly different troubleshooting checklists.
+
+This is the harder of the two problems to troubleshoot.
+
+What’s good to know here: when the Minddistrict platform shows a login form this means that the authentication failed. It can also state that the userid is not known in the application.
+
+Check the following things:
+
+1. Using the same input parameters: does the example JavaScript implementation generate valid URLs? If this is the case then the non-example implementation is not correct.
+2. Is the secret key the same in the system generating the delegated logon URLs and the Minddistrict platform? Regenerate the key if necessary.
+3. Is the base URL, that you’re generating a URL with, correct?
+4. Is the usertype that you’re using correct?
+5. Is the user id of the user that you are creating a delegated logon URL for the same in both systems? The user id in the Minddistrict platform can contain spaces: edit the id to be certain there are no spaces in it.
+6. Is the server time correct? The server time can be found in the beginning of the HTML source of every page of the Minddistrict platform. The server time of the system generating the URLs may be a little late without causing problems. It definitely should not be early, as delegated logon links with timestamps in the future (relative to the Minddistrict platform server) are invalid.
+7. Each nonce can be used only once; if a nonce is used for a second time the delegated logon URL is invalid. Double check that a request for a certain URL is performed only once.
+8. Is the message that is used to create the token created correctly? Does it contain all the GET parameters?
+9. Is the algorithm used to create the token correct? The most reliable way to check this is to verify it with the example implementation in this documentation. More information on how to verify can be found below this section.
+
+To compare algorithms the basic thing to do is have the same inputs and log specific relevant variables during the execution of the algorithm. The following steps may help:
+
+1. Change the not-yet-working implementation so that it always uses the same timestamp and nonce.
+2. Save this documentation page including all the external resources.
+3. In the locally saved HTML: change the JavaScript code so that it too always uses the same timestamp and nonce.
+4. Now you have a “local reference implementation” that you can compare with your own implementation. Add logs or print statements to your own implementation to report the values of internal variables while the algorithm is running, and add console.log() calls for the same variables in the JavaScript code.
+5. Open the local page in a browser that has a console (Chrome or Firefox).
+6. Run both implementations and compare the logged/printed variables.
+
+*** Frame redirect URL
+
+When adding a redirect URL in the mix there’s a lot of moving parts, so it’s a good idea to first get the delegated logon working without redirect and only then add the redirect parameter.
+
+Things to check if the delegated logon is no longer working when the redirect URL is added:
+
+First of all: is the authentication failing, or the redirection? When the authentication fails a login form is shown. When the redirect fails the server will display an “Unauthorized” error message.
+
+When the authentication fails you should check the following:
+
+1. Is the redirect URL part of the message?
+2. Are the values in the message in the right, alphabetical order?
+3. Is the redirect URL parameter indeed not encoded in the message?
+4. Is the redirect URL parameter correctly encoded in the URL?
+
+When the authentication succeeds but the redirection doesn’t:
+1. Is the basepath correct? (needs to end in aux/frameredirect)
+2. In the security settings of the application, is the “Allow frames” setting set to True?
+3. Is the domain of the URL that is being redirected to configured in the list of domains that can frame the Minddistrict platform?
+
+A very similar problem is “our implementation of the delegated logon works in one environment but not the other”.
+
+Check the following things:
+
+1. Is the secret key the same in the system generating the delegated logon URLs and the Minddistrict platform? Regenerate the key if necessary.
+2. Is the base URL, that you’re generating a URL with, still correct?
+3. Is the user id of the user that you are creating a delegated logon URL for the same in both systems? The user id in the Minddistrict platform can contain spaces: edit the id to be certain there are no spaces in it.
+4. Is the server time correct? The server time can be found in the beginning of the HTML source of every page of the Minddistrict platform. The server time of the system generating the URLs may be a little late without causing problems. It definitely should not be early, as delegated logon links with timestamps in the future (relative to the Minddistrict platform server) are invalid.
+5. Was the software or environment generating the delegated logon URLs updated recently? If so: does the old version still generate working delegated logon URLs?
+
+** [[https://docs.minddistrict.com/delegatedlogon/index.html#reference-implementation-in-javascript][Reference implementation in JavaScript]] (online)

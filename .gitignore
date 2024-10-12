@@ -2,6 +2,7 @@
 __pycache__
 *.override.yml
 data/
+static/
 .DS_Store
 .docker.env
 *.*~

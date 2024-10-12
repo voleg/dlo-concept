@@ -1,7 +1,6 @@
-# coding-assignment-dlo
-Job interview coding assignment "DLO"
+# Auth: Delegated logon concept
 
-This is an app demonstrating Delegated Logon connection from third party to Minddistrict platform.
+This is an app demonstrating Delegated Logon connection from third party to DLO enabled platform.
 
 Tooling: 
 - Docker
@@ -18,9 +17,8 @@ Tooling:
 this make you can:
 
 	$ make build 
-	$ make run
-	
-	
+	$ make run	
+
 without it: 
 
 	$ docker build -t heljetech_dlo:latest .
